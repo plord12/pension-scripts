@@ -2,14 +2,17 @@
  * `AVIVA_USER=myuser AVIVA_PWD=mypassword node aviva.js`
  *
  */
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-extra');
+
+const StealthPlugin = require('puppeteer-extra-plugin-stealth')
+puppeteer.use(StealthPlugin())
 
 puppeteer.launch({ headless: false }).then(async browser => {
 	
   const page = await browser.newPage();
   const session = await page.target().createCDPSession();
   const {windowId} = await session.send('Browser.getWindowForTarget');
-  await session.send('Browser.setWindowBounds', {windowId, bounds: {windowState: 'minimized'}});
+  //await session.send('Browser.setWindowBounds', {windowId, bounds: {windowState: 'minimized'}});
 
   await page.setViewport({ width: 1280, height: 1280 });
   await page.setCookie({ 'name': 'OptanonAlertBoxClosed', 'value': '2021-04-19T11:35:35.166Z', 'domain': '.aviva.co.uk' });
@@ -22,7 +25,8 @@ puppeteer.launch({ headless: false }).then(async browser => {
   await page.waitForSelector("html");
   //console.log( "two" );
   //await page.screenshot({ path: 'two.png' });
-  const firstResponse = await page.waitForResponse('https://www.direct.aviva.co.uk/MyPortfolio/Product/ProductDetailsWithVariant?productType=Pension&productCode=50019');
+  // FIX THIS - should work out the URL below
+  const firstResponse = await page.waitForResponse('https://www.direct.aviva.co.uk/MyPortfolio/Product/ProductDetailsWithVariant?productType=Pension&productCode=50010');
   //console.log( "three" );
 
   var response = await firstResponse.text();
