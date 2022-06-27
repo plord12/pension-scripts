@@ -12,6 +12,8 @@ puppeteer.launch({ headless: true }).then(async browser => {
   //await session.send('Browser.setWindowBounds', {windowId, bounds: {windowState: 'minimized'}});
   await page.setViewport({ width: 1280, height: 1280 });
   await page.goto('https://app.moneyfarm.com/gb/sign-in');
+  await page.waitForSelector('#root > div > div > div > div > div > div.sc-jgHCSr.grdnS > button');
+  await page.click('#root > div > div > div > div > div > div.sc-jgHCSr.grdnS > button');
   await page.waitForSelector('#email');
   await page.type('#email', process.env.MONEYFARM_USER);
   await page.type('#password', process.env.MONEYFARM_PWD);
