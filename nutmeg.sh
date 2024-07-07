@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # NUTMEG_USER=myuser NUTMEG_PWD=mypassword NUTMEG_NAME="My pension" ./nutmeg.sh
 #

@@ -8,34 +8,41 @@ puppeteer.launch({ headless: true }).then(async browser => {
 	
   const page = await browser.newPage();
   await page.setViewport({ width: 1280, height: 1280 });
-  await page.goto('https://login.nutmeg.com/');
-  await page.waitForSelector('#email');
-  await page.type('#email', process.env.NUTMEG_USER);
-  await page.type('#password', process.env.NUTMEG_PWD);
-  await page.click('[type=submit]');
-  await page.waitForSelector("html");
-  const firstResponse = await page.waitForResponse(response => response.url() === 'https://app.nutmeg.com/client/portfolio' && response.status() === 200);
-  var response = await firstResponse.text();
-  //console.log( response );
 
-  /*
-                  <!-- fund name -->
-                  <h4 class="fund-name" style="margin-top: 7px;" rel="tooltip" title="">
-                    My Nutmeg pension
-                  </h4>
-                </div>
+  try {
+    await page.goto('https://authentication.nutmeg.com/login');
+    await page.waitForSelector('#onetrust-accept-btn-handler');
+    await page.click('#onetrust-accept-btn-handler');
 
-                <div class="col-xs-2 fund-pending-transfers" style="margin-top: 2px;" id="pending_values_ae3fdad3-fe3f-4378-b5d2-bce0cdc69f17">
-                  <h2 class="amount text-right pull-right" style="margin-right: 20px;">
+    await page.waitForSelector('#username');
+    await page.type('#username', process.env.NUTMEG_USER);
+    await page.type('#password', process.env.NUTMEG_PWD);
 
-                    &pound;464,255
-  */
+    await page.keyboard.press('Enter');
 
+    //const [button] = await page.$x("//button[contains(., 'Sign in')]");
+    //console.log(button);
+    //if (button) {
+    //  await button.click();
+    //}
+    //await page.click('button.cb8dcbc41:nth-child(1)');
 
-  var matched = response.match(new RegExp("h4 class=\"fund-name\"[^>]*>[^>]*"+process.env.NUTMEG_NAME+".*?&pound;([0-9,]*)", "s"));
-  var balance = matched[1].replace(",","");
+    try {
+      var element = await page.waitForSelector("section._nk-section--stack-spacing-lg_txy8p_16:nth-child(2) > section:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(2)");
+      var balance = await element.evaluate(el => el.textContent);
+      balance = balance.replace("£", "").replace(",", "")
+      console.log(balance);
+    } catch (error) {
+      var element = await page.waitForSelector("section._nk-section--stack-spacing-lg_txy8p_16:nth-child(1) > section:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(2)");
+      var balance = await element.evaluate(el => el.textContent);
+      balance = balance.replace("£", "").replace(",", "")
+      console.log(balance);
+    }
 
-  console.log( balance );
+  } catch (error) {
+    console.error(error);
+    await page.screenshot({ path: 'debug-nutmeg-' + process.env.NUTMEG_USER + '.png' });
+  }
 
   await browser.close();
 })
